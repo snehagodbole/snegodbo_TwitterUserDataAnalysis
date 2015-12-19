@@ -1,0 +1,380 @@
+<!-- This file is used to generated for drawing dashboards using d3.js,javascript,topojson and google api's  
+Author : Sneha Godbole. 
+
+*/ -->
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+.graticule {
+	fill: blue;
+	stroke: #777;
+	stroke-width: .5px;
+	stroke-opacity: .5;
+}
+
+.land {
+	fill: lightgray;
+}
+
+.boundary {
+	fill: none;
+	stroke: #fff;
+	stroke-width: .5px;
+}
+</style>
+<body>
+	<div id="upperContainer" style="margin: 10px;"></div>
+	<div id="main"></div>
+	<script type="text/javascript"
+		src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['bar']}]}"></script>
+	<script src="d3.min.js"></script>
+	<script src="topojson.min.js"></script>
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript" src="Top10Users.js"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+	<script>
+		var width = 1000, height = 460, radius = 7;
+		var top = 49.3457868, left = -124.7844079, right = -66.9513812, bottom = 24.7433195;//These are lat/lng for US
+		var fields = [ 'Twitter Users Across World',
+				'Influential Twitter Users Across World',
+				'Influential Twitter Users In The  USA',
+				'Most Active Twitter Users', 'Most Active Users In USA',
+				"Top 10 Influential Users Across The World- Bar Chart" ];
+		var config = {
+			"color1" : "#d3e5ff",
+			"color2" : "#08306B",
+			"stateDataColumn" : "state_or_territory",
+			"defaultValue" : "twit across world",
+			"state" : "state_or_territory"
+		};
+		
+		//I am using lot of color shades here to look GUI more attractive.
+		var colors = d3.scale.ordinal().domain([ "foo", "bar", "baz" ]).range(
+				[ "#015eff", "#0cc402", "#fc0a18", "#aea7a5", "#ff15ae",
+						"#d99f07", "#11a5fe", "#037e43", "#ba4455", "#d10aff",
+						"#9354a6", "#7b6d2b", "#08bbbb", "#95b42d", "#b54e04",
+						"#ee74ff", "#2d7593", "#e19772", "#fa7fbe", "#fe035b",
+						"#aea0db", "#905e76", "#92b27a", "#03c262", "#878aff",
+						"#4a7662", "#ff6757", "#fe8504", "#9340e1", "#2a8602",
+						"#07b6e5", "#d21170", "#526ab3", "#ff08e2", "#bb2ea7",
+						"#e4919f", "#09bf91", "#90624c", "#bba94a", "#a26c05",
+						"#5c7605", "#df89e7", "#b0487c", "#ee9345", "#70b458",
+						"#b19b71", "#6b6d74", "#ec5206", "#85a7c7", "#ff678c",
+						"#b55b3e", "#8054cc", "#7eb0a0", "#c480b3", "#d9102d",
+						"#5a783f", "#fe66d2", "#bc13c8", "#62bd33", "#b8ab03",
+						"#8f31ff", "#fd8581", "#049279", "#74739c", "#0e6ad6",
+						"#747151", "#01878d", "#0380bf", "#bf81fd", "#8ba1fb",
+						"#887a02", "#c09bb5", "#a97741", "#d04096", "#c19083",
+						"#a583da", "#8ca149", "#b16368", "#c23e37", "#fd7b40",
+						"#d12153", "#b24cd2", "#56a66f", "#5dafbd", "#78aceb",
+						"#2375fe", "#d49f54", "#ea41d3", "#885e92", "#8468fd",
+						"#cf4eff", "#c93716", "#c563af", "#d66886", "#664dfd",
+						"#468530", "#6d60be", "#fa8a64", "#059843", "#ff55a1",
+						"#638b8e", "#bd6d2e", "#ff0f7a", "#3f93ff", "#ff5167",
+						"#8f9a7f", "#d68201", "#8b9054", "#fe4935", "#9d7e85",
+						"#01a52b", "#59b99b", "#ba5cc4", "#4bbe73", "#679925",
+						"#b99023", "#408158", "#fa56fe", "#d6603b", "#839004",
+						"#d1786a", "#cb4170", "#897abb", "#8e8ca1", "#4197c2",
+						"#a88e49", "#157fd5", "#ba6bff", "#d20498", "#da6d10",
+						"#7fb905", "#bd728d", "#fc0cfe", "#f51590", "#e35c60",
+						"#7e685e", "#5c65dc", "#6886c3", "#8faeb5", "#11b3f9",
+						"#ca95db", "#ab1de7", "#6c9a54", "#ea8bb4", "#a17da5",
+						"#687ddc", "#ff0f37", "#6e9b77", "#d71c02", "#93784e",
+						"#9d8b7b", "#fc08c6", "#e974e4", "#44a298", "#9f528d",
+						"#9f69cf", "#f27cd2", "#0ec339", "#6f7a2d", "#aa72b7",
+						"#0393ad", "#43709f", "#ac4e69", "#707d71", "#db5d95",
+						"#55bb4f", "#aeac62", "#a8af3e", "#de9b38", "#b77b5d",
+						"#fc4277", "#fe8299", "#b0409b", "#876910", "#d50fe5",
+						"#f547ae", "#a9a4c9", "#976565", "#049f67", "#e58acd",
+						"#cea06d", "#60778f", "#7a677e", "#d62f44", "#a3584a",
+						"#d3686f", "#fe4103", "#539d01", "#0f7b6e", "#667e5a",
+						"#ff444e", "#938f37", "#8f74f4", "#a5981a", "#c18a96",
+						"#9c5d38", "#ac02ff", "#b86804", "#da581a", "#d150cf",
+						"#da6a58", "#bf94fe", "#0fb9d3", "#4b5de9", "#5b90a8",
+						"#c86a9a", "#7a5faa", "#d44de5", "#d658bd", "#d27951",
+						"#2dad06", "#8cb64a", "#c40db3", "#9a601e", "#fb731d",
+						"#e2948b", "#479d53", "#a8ac7e", "#df773a", "#447b02",
+						"#a2577e", "#4b83fd", "#f23dbe", "#f364b7", "#d88c4f",
+						"#6c713d", "#6d8bb4", "#479b36", "#ad8132", "#5e97e7",
+						"#c59ac9", "#974cbb", "#b64a44", "#f88d2e", "#9452dd",
+						"#e04339", "#de4e6a", "#367680", "#a748ff", "#f5603a",
+						"#cb6ce7", "#ae9ded", "#d00a83", "#0f7f22", "#af5222",
+						"#888f91", "#62b2d5", "#a4b105", "#fd76a5", "#79b870",
+						"#09bda9", "#ec4782", "#689281", "#9f97fc", "#fc69eb",
+						"#c09d9f", "#79b636", "#d795b4", "#7ab689", "#c33279",
+						"#3c7a3a", "#bf8204", "#b3a78f", "#c9a51e", "#a834d0",
+						"#f20243", "#bb6fc6", "#c5822f", "#dd0fce", "#9aada1",
+						"#02885e", "#8d9de3", "#668931", "#10a3ae", "#df0863",
+						"#8d5aff", "#8e8a62", "#77945f", "#8c8cbe", "#a47f66",
+						"#93b08d", "#f18e76", "#8f79e1", "#b6766c" ]);
+		
+		var _USStatesData = [];
+		var _ActiveUsersData = [];
+
+		d3
+				.json(
+						"processedData.json",
+						
+		function(err, data) {
+							var _data = data;
+							//This first for loop is used to calculate active users from dataset 
+							for (var i = 0; i < _data.length; i++) {
+								if (((_data[i].friend_count * 0.004) + (_data[i].follower_count * 0.0004)) > 50) {
+									_ActiveUsersData.push(_data[i]);
+								}
+							}
+
+							/*In this loop i am fetching all users which are in united states ,here i am checking conditions 
+							 First condition in if is for checking the boundries from east to west(california),second is for alska & other states.
+							*/
+							for (var i = 0; i < _data.length; i++) {
+								var item = _data[i];
+								if (((24.7433195 <= item['geocode.location.lat'] && item['geocode.location.lat'] <= 49.3457868) && (item['geocode.location.lng'] && item['geocode.location.lng'] <= -66.9513812))
+										|| (item['geocode.location.lat'] <= 66 && item['geocode.location.lng'] < -132)
+										&& item['geocode.location.lat'] > 1) {
+									_USStatesData.push(_data[i]);
+								}
+							}
+
+							// console.log(_ActiveUsersData);
+						});
+
+		/** function to draw different maps depending upon selection from dropdown */
+
+		function drawMap(val) {
+
+			document.getElementById("main").innerHTML = "";
+			d3.select("svg").remove();
+			/** Draw Top 10 Influential Users Across The  World- Bar Chart of top 10 Influential people worldwide */
+			if (val == 'Top 10 Influential Users Across The World- Bar Chart') {
+				document.getElementById("main").style.height = "460px";
+				google.load("visualization", "1", {
+					packages : [ "bar" ]
+				});
+				google.setOnLoadCallback(drawChart);
+
+				function drawChart() {
+
+					var data = google.visualization.arrayToDataTable(_dataTopPlot);
+
+					var options = {
+						bars : 'horizontal',
+						chart : {
+							title : 'Top 10 influential people world wide'
+						},
+					};
+
+					var chart = new google.charts.Bar(document
+							.getElementById('main'));
+
+					chart.draw(data, options);
+
+					return;
+				}
+				drawChart();//Call Method which draws Top 10 Influential Users Across The  World- Bar Chart
+
+			} else {
+
+				document.getElementById("main").style.height = "0px";
+				var projection = d3.geo.equirectangular().scale(148).translate(
+						[ width / 2, height / 2 ]).precision(.1);
+
+				var path = d3.geo.path().projection(projection);
+
+				var graticule = d3.geo.graticule();
+
+				var svg = d3.select("body").append("svg").attr("width", width)
+						.attr("height", height).style('fill', "skyblue");
+				svg.append("path").datum(graticule).attr("class", "graticule")
+						.attr("d", path);
+
+				var str;
+				if (val == 'Influential Twitter Users In The  USA'
+						|| val == 'Most Active Users In USA') {
+					str = "us.json";
+					projection.center([ -107, 35 ]);
+					projection.scale(370);
+
+				} else
+					str = "world.json";
+
+				d3.json(str, function(error, world) {
+					if (error)
+						throw error;
+
+					svg.insert("path", ".graticule").datum(
+							topojson.feature(world, world.objects.land)).attr(
+							"class", "land").attr("d", path);
+
+					svg.insert("path", ".graticule").datum(
+							topojson.mesh(world, world.objects.countries,
+									function(a, b) {
+										return a !== b;
+									})).attr("class", "boundary").attr("id",
+							world.objects.countries.geometries.id).attr("d",
+							path);
+
+				});
+
+				d3
+						.json(
+								"processedData.json",
+								function(err, data) {
+
+									if (val == 'Influential Twitter Users In The  USA'
+											|| val == "Most Active Users In USA") {
+
+										var _tempdata = [];
+										if (val == 'Influential Twitter Users In The  USA')
+											_tempdata = _USStatesData;
+
+										else
+											_tempdata = _ActiveUsersData;
+
+										svg
+												.selectAll("circle")
+												.data(_tempdata)
+												.enter()
+												.append("circle")
+												.attr(
+														"cx",
+														function(d) {
+															return projection([
+																	d['geocode.location.lng'],
+																	d['geocode.location.lat'] ])[0];
+														})
+												.attr(
+														"cy",
+														function(d) {
+															return projection([
+																	d['geocode.location.lng'],
+																	d['geocode.location.lat'] ])[1];
+														})
+												.attr(
+														"r",
+														function(d) {
+															if (val == 'Influential Twitter Users In The  USA')
+																return Math
+																		.sqrt(parseInt(d.follower_count) * 0.009);
+															else
+																return Math
+																		.sqrt((d.friend_count * 0.005)
+																				+ (d.follower_count * 0.005));
+
+														})
+
+												.style(
+														"fill",
+														function(d) {
+
+															return colors(Math
+																	.sqrt(parseInt(d.follower_count) * 0.002));
+														})
+												.style("opacity", 0.75)
+												.append("title")
+												.text(
+														function(p) {
+															return " User Name : "
+																	+ p['user_name']
+																	+ "   \n Address : "
+																	+ p['geocode.formatted_address']
+																	+ " \n Number OF Followers : "
+																	+ p['follower_count']
+																	+ " \n Number Of Friends : "
+																	+ p['friend_count'];
+														});
+									} else {
+
+										var _tempdata = [];
+										if (val == 'Most Active Twitter Users')
+											_tempdata = _ActiveUsersData;
+										else
+											_tempdata = data;
+
+										svg
+												.selectAll("circle")
+												.data(_tempdata)
+												.enter()
+												.append("circle")
+												.attr(
+														"cx",
+														function(d) {
+															return projection([
+																	d['geocode.location.lng'],
+																	d['geocode.location.lat'] ])[0];
+														})
+												.attr(
+														"cy",
+														function(d) {
+															return projection([
+																	d['geocode.location.lng'],
+																	d['geocode.location.lat'] ])[1];
+														})
+												.attr(
+														"r",
+														function(d) {
+															//console.log(d.friend_count);                            
+															if (val == 'Influential Twitter Users Across World') {
+																return Math
+																		.sqrt(parseInt(d.follower_count) * 0.004);
+															} else if (val == "Most Active Twitter Users") {
+																return Math
+																		.sqrt((d.friend_count * 0.005)
+																				+ (d.follower_count * 0.005));
+															} else
+																return 5;
+														})
+
+												.style(
+														"fill",
+														function(d) {
+															if (val == 'Influential Twitter Users Across World')
+																return colors(parseInt(d.follower_count) / 2);
+															else
+																return colors(parseInt(d.friend_count
+																		+ d.follower_count) / 2);
+														})
+												.style("opacity", 0.75)
+												.append("title", "hi")
+												.text(
+														function(p) {
+															return " User Name : "
+																	+ p['user_name']
+																	+ "   \n Address : "
+																	+ p['geocode.formatted_address']
+																	+ " \n Number Of Followers : "
+																	+ p['follower_count']
+																	+ " \n Number Of Friends : "
+																	+ p['friend_count'];
+														});
+									}
+								});
+				d3.select(self.frameElement).style("height", height + "px");
+			}
+
+		};
+
+		/** Option list */
+
+		var option_select = d3.select('#upperContainer').append("select").attr(
+				"class", "option-select").on("change", function() {
+
+			drawMap($("#upperContainer").find(".option-select").val());
+		});
+		for (var i = 0; i < fields.length; i++) {
+
+			if (fields[i] !== config.state) {
+				var opt = option_select.append("option").attr("value",
+						fields[i]).text(fields[i]);
+
+				if (fields[i] === config.defaultValue) {
+					opt.attr("selected", "true");
+				}
+			}
+
+		}
+		drawMap(config.defaultValue);
+	</script>
